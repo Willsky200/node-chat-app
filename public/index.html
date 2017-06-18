@@ -12,20 +12,7 @@
 <!-- We can acces the socket.io library which is provided when we have
 the socket.io module set up as a server. Now we have lots of methods available -->
 	<script src="/socket.io/socket.io.js"></script>
-	<script>
-		// this initiates the request from the server to open a connection
-		var socket = io();
-
-		// listen for an event called "connect"
-		socket.on("connect", () => {
-			console.log("Connected to server");
-		});
-
-		// listen for a disconnection
-		socket.on("disconnect", () => {
-			console.log("Disconnected from server");
-		});
-	</script>
+	<script src="/js/index.js"></script>
 </body>
 
 </html>

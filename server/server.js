@@ -40,10 +40,42 @@ app.get("/", (req, res) => {
 io.on("connection", (socket) => {
 	console.log("New user connected");
 
+	// emit a custom event. There is no callback function because this is
+	// an emit not a listener
+	// But we do want to send some data. We use an object as the second arg
+	// and we can specify whatever we like
+
+	// socket.emit("newEmail", {
+	// 	from: "jim@boble.com",
+	// 	text: "Why don't you get lost.",
+	// 	createdAt: 123
+	// });
+
+	// emit a custom event to the client and supply data in an object
+	socket.emit("newMessage", {
+		from: "Gwyneth",
+		text: "I'm ready to go.",
+		createdAt: 123123
+	});
+
+	// set up event listener for the custom event emitter from the client
+	// the callback function argument (here it is newEmail) is the data sent
+	// from the client emitter
+
+	// socket.on("createEmail", (newEmail) => {
+	// 	console.log("Create email", newEmail);
+	// });
+
+	// set up custom event listener to receive data from the client when it 
+	// emits a createMessage event.
+	socket.on("createMessage", (message) => {
+		console.log("Create message", message);
+	});
+
 	// listen for a client disconnection e.g. closing the tab
 	socket.on("disconnect", () => {
 		console.log("Client disconnected");
-	})
+	});
 })
 
 // we use server.listen because we are using socket.io
