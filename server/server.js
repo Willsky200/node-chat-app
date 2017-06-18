@@ -52,11 +52,11 @@ io.on("connection", (socket) => {
 	// });
 
 	// emit a custom event to the client and supply data in an object
-	socket.emit("newMessage", {
-		from: "Gwyneth",
-		text: "I'm ready to go.",
-		createdAt: 123123
-	});
+	// socket.emit("newMessage", {
+	// 	from: "Gwyneth",
+	// 	text: "I'm ready to go.",
+	// 	createdAt: 123123
+	// });
 
 	// set up event listener for the custom event emitter from the client
 	// the callback function argument (here it is newEmail) is the data sent
@@ -69,7 +69,16 @@ io.on("connection", (socket) => {
 	// set up custom event listener to receive data from the client when it 
 	// emits a createMessage event.
 	socket.on("createMessage", (message) => {
-		console.log("Create message", message);
+		// log the contents
+		// console.log("Create message", message);
+
+		// this emits an event to all connected users. socket.emit emits
+		// to a single connection, while io.emit sends to all users
+		io.emit("newMessage", {
+			from: message.from,
+			text: message.text,
+			createdAt: new Date().getTime()
+		});
 	});
 
 	// listen for a client disconnection e.g. closing the tab
