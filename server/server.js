@@ -78,9 +78,12 @@ io.on("connection", (socket) => {
 
 	// set up custom event listener to receive data from the client when it 
 	// emits a createMessage event.
-	socket.on("createMessage", (message) => {
+
+	// callback is used for acknowledging events. It is called later
+	// to activate the acknowledgement 
+	socket.on("createMessage", (message, callback) => {
 		// log the contents
-		// console.log("Create message", message);
+		console.log("Create message", message);
 
 		// emit an event to all connected users. socket.emit emits
 		// to a single connection, while io.emit sends to all users
@@ -96,6 +99,10 @@ io.on("connection", (socket) => {
 		// 	text: message.text,
 		// 	createdAt: new Date().getTime()
 		// });
+		// 
+		// we can send data back in the callback, for example an error message,
+		// or an object
+		callback("This is from the server");
 	});
 
 	// listen for a client disconnection e.g. closing the tab
