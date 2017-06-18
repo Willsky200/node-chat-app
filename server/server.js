@@ -8,6 +8,8 @@ const http = require("http");
 const express = require("express");
 const socketIO = require("socket.io");
 
+const {generateMessage} = require("./utils/message");
+
 
 // path.join takes arguments that it joins together. As this file is in
 // /server, normally we would have to go out out the /server dir and then
@@ -40,17 +42,13 @@ app.get("/", (req, res) => {
 io.on("connection", (socket) => {
 	console.log("New user connected");
 
-	socket.emit("newMessage", {
-		from: "Admin",
-		text: "Welcome to the chat app",
-		createdAt: new Date().getTime()
-	});
+	// emit a message to the connected user greeting them.
+	// use the generateMessage function to create the message object
+	socket.emit("newMessage", generateMessage("Admin", "Welcome to the chat app"));
 
-	socket.broadcast.emit("newMessage", {
-		from: "Admin",
-		text: "New user joined",
-		createdAt: new Date().getTime()
-	});
+	// emit a newMessage that goes to all users except the connected
+	// informs the others that a new user has joined
+	socket.broadcast.emit("newMessage", generateMessage("Admin", "New user joined"));
 
 	// emit a custom event. There is no callback function because this is
 	// an emit not a listener
@@ -84,13 +82,9 @@ io.on("connection", (socket) => {
 		// log the contents
 		// console.log("Create message", message);
 
-		// this emits an event to all connected users. socket.emit emits
+		// emit an event to all connected users. socket.emit emits
 		// to a single connection, while io.emit sends to all users
-		io.emit("newMessage", {
-			from: message.from,
-			text: message.text,
-			createdAt: new Date().getTime()
-		});
+		io.emit("newMessage", generateMessage(message.from, message.text));
 
 		// broadcasting is the name for emitting an event to everyone except
 		// the emitting user.
