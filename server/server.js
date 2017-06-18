@@ -40,6 +40,18 @@ app.get("/", (req, res) => {
 io.on("connection", (socket) => {
 	console.log("New user connected");
 
+	socket.emit("newMessage", {
+		from: "Admin",
+		text: "Welcome to the chat app",
+		createdAt: new Date().getTime()
+	});
+
+	socket.broadcast.emit("newMessage", {
+		from: "Admin",
+		text: "New user joined",
+		createdAt: new Date().getTime()
+	});
+
 	// emit a custom event. There is no callback function because this is
 	// an emit not a listener
 	// But we do want to send some data. We use an object as the second arg
@@ -79,6 +91,17 @@ io.on("connection", (socket) => {
 			text: message.text,
 			createdAt: new Date().getTime()
 		});
+
+		// broadcasting is the name for emitting an event to everyone except
+		// the emitting user.
+		// To do this we have to specify the individual socket so the library
+		// knows which user shouldn't get the event.
+
+		// socket.broadcast.emit("newMessage", {
+		// 	from: message.from,
+		// 	text: message.text,
+		// 	createdAt: new Date().getTime()
+		// });
 	});
 
 	// listen for a client disconnection e.g. closing the tab
