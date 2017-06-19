@@ -23,5 +23,6 @@ describe("generateLocationMessage", () => {
 
 		expect(message.createdAt).toBeA("number");
 		expect(message).toInclude({from, url});
+		
 	})
 })
