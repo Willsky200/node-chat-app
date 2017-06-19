@@ -8,7 +8,7 @@ const http = require("http");
 const express = require("express");
 const socketIO = require("socket.io");
 
-const {generateMessage} = require("./utils/message");
+const {generateMessage, generateLocationMessage} = require("./utils/message");
 
 
 // path.join takes arguments that it joins together. As this file is in
@@ -103,6 +103,12 @@ io.on("connection", (socket) => {
 		// we can send data back in the callback, for example an error message,
 		// or an object
 		callback("This is from the server");
+	});
+
+	socket.on("createLocationMessage", (coords) => {
+		// emit a new event type and pass in three value (name, lat and long)
+		// to the generateLocationMessage function which will return a url.
+		io.emit("newLocationMessage", generateLocationMessage("Jimad", coords.latitude, coords.longitude));
 	});
 
 	// listen for a client disconnection e.g. closing the tab
