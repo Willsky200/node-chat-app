@@ -1,4 +1,5 @@
 
+var moment = require("moment");
 // create a function that generates a message object based on two arguments,
 // from and text.
 var generateMessage = (from, text) => {
@@ -6,7 +7,7 @@ var generateMessage = (from, text) => {
 		from,
 		text,
 		// Also supplies a createdAt time stamp for the current time
-		createdAt: new Date().getTime()
+		createdAt: moment().valueOf()
 	};
 };
 
@@ -17,7 +18,7 @@ var generateLocationMessage = (from, latitude, longitude) => {
 	return {
 		from,
 		url: `https://www.google.com/maps?q=${latitude},${longitude}`,
-		createdAt: new Date().getTime()
+		createdAt: moment().valueOf()
 	}
 }
 
