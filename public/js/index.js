@@ -36,35 +36,62 @@ socket.on("disconnect", function () {
 
 // listen for custom event newMessage and data coming from the server
 socket.on("newMessage", function(message) {
-	console.log("New message", message);
+	// console.log("New message", message);
 
-	// create formatted time variable for the createdAt value
+	// // create formatted time variable for the createdAt value
 	var formattedTime = moment(message.createdAt).format("h:mm a");
-	// create var li as an empty list item
-	var li = jQuery("<li></li>");
-	// change the text of li to the from and text values from message
-	// that has been sent from the server
-	li.text(`${message.from} ${formattedTime}: ${message.text}`);
-	// append the li to the ordered list
-	jQuery("#messages").append(li);
+
+	// THIS IS REDUNDANT CODE USED INITIALLY BUT REPLACED BY TEMPLATES
+	// // create var li as an empty list item
+	// var li = jQuery("<li></li>");
+	// // change the text of li to the from and text values from message
+	// // that has been sent from the server
+	// li.text(`${message.from} ${formattedTime}: ${message.text}`);
+	// // append the li to the ordered list
+	// jQuery("#messages").append(li);
+
+	var template = $("#message-template").html();
+
+	var html = Mustache.render(template, {
+		text: message.text,
+		from: message.from,
+		createdAt: formattedTime
+	});
+
+	$("#messages").append(html);
 });
 
 // listen for the newLocationMessage
 socket.on("newLocationMessage", function(message) {
-	// create var li as an empty list item
-	var li = jQuery("<li></li>");
+
 
 	// create formatted time variable for the createdAt value
 	var formattedTime = moment(message.createdAt).format("h:mm a");
+
+	// THIS IS REDUNDANT CODE USED INITIALLY BUT REPLACED BY TEMPLATES
+	//====================================================================
+	// create var li as an empty list item
+	// var li = jQuery("<li></li>");
 	// create var a as a link with text. The target="_blank" means that the
 	// link will open in a new tab.
-	var a = jQuery("<a target='_blank'>My current location</a>");
+	// var a = jQuery("<a target='_blank'>My current location</a>");
 
-	li.text(`${message.from} ${formattedTime}: `);
-	a.attr("href", message.url);
+	// li.text(`${message.from} ${formattedTime}: `);
+	// a.attr("href", message.url);
 
-	li.append(a);
-	jQuery("#messages").append(li);
+	// li.append(a);
+	// jQuery("#messages").append(li);
+	//====================================================================
+
+	var template = $("#location-message-template").html();
+
+	var html = Mustache.render(template, {
+		url: message.url,
+		from: message.from,
+		createdAt: formattedTime
+	});
+
+	$("#messages").append(html);
 });
 
 // socket.emit("createMessage", {
