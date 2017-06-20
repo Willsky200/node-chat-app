@@ -1,7 +1,26 @@
 // this initiates the request from the server to open a connection
 var socket = io();
 
-		// listen for an event called "connect"
+function scrollToBottom() {
+	// Selectors
+	var messages = $("#messages");
+	var newMessage = messages.children("li:last-child");
+
+	// Heights
+	var clientHeight = messages.prop("clientHeight");
+	var scrollTop = messages.prop("scrollTop");
+	var scrollHeight = messages.prop("scrollHeight");
+	var newMessageHeight = newMessage.innerHeight();
+	var lastMessageHeight = newMessage.prev().innerHeight();
+
+	// Calculation
+
+	if (clientHeight + scrollTop + newMessageHeight + lastMessageHeight >= scrollHeight) {
+		messages.scrollTop(scrollHeight);
+	}
+}
+
+	// listen for an event called "connect"
 socket.on("connect", function () {
 	console.log("Connected to server");
 
@@ -38,10 +57,8 @@ socket.on("disconnect", function () {
 socket.on("newMessage", function(message) {
 	// console.log("New message", message);
 
-	// // create formatted time variable for the createdAt value
-	var formattedTime = moment(message.createdAt).format("h:mm a");
-
 	// THIS IS REDUNDANT CODE USED INITIALLY BUT REPLACED BY TEMPLATES
+	//====================================================================
 	// // create var li as an empty list item
 	// var li = jQuery("<li></li>");
 	// // change the text of li to the from and text values from message
@@ -49,6 +66,10 @@ socket.on("newMessage", function(message) {
 	// li.text(`${message.from} ${formattedTime}: ${message.text}`);
 	// // append the li to the ordered list
 	// jQuery("#messages").append(li);
+	//====================================================================
+
+	// // create formatted time variable for the createdAt value
+	var formattedTime = moment(message.createdAt).format("h:mm a");
 
 	var template = $("#message-template").html();
 
@@ -59,14 +80,11 @@ socket.on("newMessage", function(message) {
 	});
 
 	$("#messages").append(html);
+	scrollToBottom();
 });
 
 // listen for the newLocationMessage
 socket.on("newLocationMessage", function(message) {
-
-
-	// create formatted time variable for the createdAt value
-	var formattedTime = moment(message.createdAt).format("h:mm a");
 
 	// THIS IS REDUNDANT CODE USED INITIALLY BUT REPLACED BY TEMPLATES
 	//====================================================================
@@ -83,6 +101,9 @@ socket.on("newLocationMessage", function(message) {
 	// jQuery("#messages").append(li);
 	//====================================================================
 
+	// create formatted time variable for the createdAt value
+	var formattedTime = moment(message.createdAt).format("h:mm a");
+
 	var template = $("#location-message-template").html();
 
 	var html = Mustache.render(template, {
@@ -92,6 +113,7 @@ socket.on("newLocationMessage", function(message) {
 	});
 
 	$("#messages").append(html);
+	scrollToBottom();
 });
 
 // socket.emit("createMessage", {
