@@ -1,21 +1,35 @@
 // this initiates the request from the server to open a connection
 var socket = io();
 
+// add a function that scrolls the messages object if the user is near the 
+// bottom and a new message is added
 function scrollToBottom() {
 	// Selectors
+	// select the messages object
 	var messages = $("#messages");
+	// select the most recently sent message
 	var newMessage = messages.children("li:last-child");
 
 	// Heights
+	// get the height of what the client is viewing of the object
 	var clientHeight = messages.prop("clientHeight");
+	// get the height of the messages object that is above what the client
+	// can see
 	var scrollTop = messages.prop("scrollTop");
+	// get the height of the whole messages object regardless if it is seen
+	// or not
 	var scrollHeight = messages.prop("scrollHeight");
+	// get the height of the most recent message
 	var newMessageHeight = newMessage.innerHeight();
+	// get the height of the second most recent message
 	var lastMessageHeight = newMessage.prev().innerHeight();
 
 	// Calculation
 
+	// if the client is viewing the bottom part of the messages object
 	if (clientHeight + scrollTop + newMessageHeight + lastMessageHeight >= scrollHeight) {
+		// set the scrollTop to the height of the messages object
+		// in other words scroll to the bottom
 		messages.scrollTop(scrollHeight);
 	}
 }
@@ -45,6 +59,7 @@ socket.on("disconnect", function () {
 	console.log("Disconnected from server");
 });
 
+// UNUSED CODE=============================================================
 // listen for the custom event coming from the server called newEmail
 // the argument in the callback function (in this case email) is the object
 // // sent my the event emitted by the server
@@ -52,6 +67,7 @@ socket.on("disconnect", function () {
 // socket.on("newEmail", function(email) {
 // 	console.log("New email", email);
 // });
+//========================================================================
 
 // listen for custom event newMessage and data coming from the server
 socket.on("newMessage", function(message) {
@@ -71,15 +87,22 @@ socket.on("newMessage", function(message) {
 	// // create formatted time variable for the createdAt value
 	var formattedTime = moment(message.createdAt).format("h:mm a");
 
+	// select the template script tag from index.html
 	var template = $("#message-template").html();
 
+	// create var html and set it to render using the template variable
+	// from above (the script in html) and create an object that contains
+	// the values to be put in the template
 	var html = Mustache.render(template, {
 		text: message.text,
 		from: message.from,
 		createdAt: formattedTime
 	});
 
+	// append the html variable to the messages object, thus adding a
+	// new message template with correct values.
 	$("#messages").append(html);
+	// call the scrollToBottom function to scroll down if necessary
 	scrollToBottom();
 });
 
@@ -104,6 +127,8 @@ socket.on("newLocationMessage", function(message) {
 	// create formatted time variable for the createdAt value
 	var formattedTime = moment(message.createdAt).format("h:mm a");
 
+	// The following code is almost identical to that in the callback
+	// function above in the newMessage listener.
 	var template = $("#location-message-template").html();
 
 	var html = Mustache.render(template, {
@@ -116,6 +141,8 @@ socket.on("newLocationMessage", function(message) {
 	scrollToBottom();
 });
 
+
+// UNUSED CODE ==============================================================
 // socket.emit("createMessage", {
 // 	from: "Bill",
 // 	text: "Hi there"
@@ -125,15 +152,18 @@ socket.on("newLocationMessage", function(message) {
 // }, function (data) {
 // 	console.log(data);
 // });
+// ==========================================================================
+
 
 // add listener to the submit button on the form
 jQuery("#message-form").on("submit", function(e) {
 	// prevent the default refresh action of the button
 	e.preventDefault();
 
+	// select the textbox that has name="message"
 	var messageTextBox = jQuery("[name=message]");
 
-	// emit to the server
+	// emit to the server, sending data in an object
 	socket.emit("createMessage", {
 		from: "User",
 		text: messageTextBox.val()
@@ -143,9 +173,13 @@ jQuery("#message-form").on("submit", function(e) {
 	});
 });
 
+// select the send location button
 var locationButton = jQuery("#send-location");
 
+// create a click listener on the location button
 locationButton.on("click", function() {
+	// if the browser does not support geolocation then send an alert
+	// saying this
 	if (!navigator.geolocation){
 		return alert("Geolocation is not supported by your browser.");
 	}
