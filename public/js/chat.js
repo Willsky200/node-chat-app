@@ -36,7 +36,21 @@ function scrollToBottom() {
 
 	// listen for an event called "connect"
 socket.on("connect", function () {
-	console.log("Connected to server");
+
+	// get params of the url which are supplied in the index.html join form
+	// uses the library deparam and takes in the argument that holds the
+	// params.
+	var params = $.deparam(window.location.search);
+
+	// emit an event called join sending the params data.
+	socket.emit("join", params, function (err) {
+		if (err) {
+			alert(err);
+			window.location.href = "/";
+		} else {
+			console.log("No error");
+		}
+	});
 
 	// create a custom event emitter. We do not need a callback function but
 	// we can nsupply data to be sent. We do this in an object so send 
@@ -57,6 +71,18 @@ socket.on("connect", function () {
 // listen for a disconnection
 socket.on("disconnect", function () {
 	console.log("Disconnected from server");
+});
+
+// listen for updateUserList event and take in a users array
+socket.on("updateUserList", function (users) {
+	console.log("Users list", users);
+	var ol = jQuery("<ol></ol>");
+
+	users.forEach(function (user) {
+		ol.append(jQuery("<li></li>").text(user));
+	});
+	jQuery("#users").html(ol);
+
 });
 
 // UNUSED CODE=============================================================

@@ -9,7 +9,8 @@ const express = require("express");
 const socketIO = require("socket.io");
 
 const {generateMessage, generateLocationMessage} = require("./utils/message");
-
+const {isRealString} = require("./utils/validation");
+const {Users} = require("./utils/users");
 
 // path.join takes arguments that it joins together. As this file is in
 // /server, normally we would have to go out out the /server dir and then
@@ -30,6 +31,8 @@ var app = express();
 var server = http.createServer(app);
 // configure the server to use socket.io. io is now our web socket server
 var io = socketIO(server);
+// create a new array called users which will be the list of users
+var users = new Users();
 
 // set the app to use files from the public directory
 app.use(express.static(publicPath));
@@ -44,11 +47,11 @@ io.on("connection", (socket) => {
 
 	// emit a message to the connected user greeting them.
 	// use the generateMessage function to create the message object
-	socket.emit("newMessage", generateMessage("Admin", "Welcome to the chat app"));
+	// socket.emit("newMessage", generateMessage("Admin", "Welcome to the chat app"));
 
 	// emit a newMessage that goes to all users except the connected
 	// informs the others that a new user has joined
-	socket.broadcast.emit("newMessage", generateMessage("Admin", "New user joined"));
+	// socket.broadcast.emit("newMessage", generateMessage("Admin", "New user joined"));
 
 	// emit a custom event. There is no callback function because this is
 	// an emit not a listener
@@ -75,6 +78,50 @@ io.on("connection", (socket) => {
 	// socket.on("createEmail", (newEmail) => {
 	// 	console.log("Create email", newEmail);
 	// });
+
+	// set up listener for the join event
+	socket.on("join", (params, callback) => {
+		// validate using the utils function
+		if (!isRealString(params.name) || !isRealString(params.room)){
+			//send error back if room and name are not valid
+			return callback("Name and room name are required");
+		}
+
+		
+		// socket.join takes the string of the room name - it is a socket
+		// method
+		socket.join(params.room)
+		// socket.leave("params.room") does the opposite and removes you
+		// from the room
+
+		// ways of emitting
+		// ioi.emit - send to everyone
+		// socket.broadcast.emit - sent to all except the user
+		// socket.emit - only sends to the user
+
+		// io.to(params.room) - this sends to everyone in the room specified
+		// by params.room
+
+		// socket.broadcast.to(params.room) - broadcas to everyone in the
+		// room except the user
+
+		// remove the user from any potential previous rooms
+		users.removeUser(socket.id);
+		// add a new user using the 3 args, id, name and room
+		users.addUser(socket.id, params.name, params.room);
+		// send to all users in the specified room the event with the
+		// users of their room as an argument.
+		io.to(params.room).emit("updateUserList", users.getUserList(params.room));
+
+		// We can stick with the normal socket.emit because it doesn't
+		// matter about rooms when it is only going to the user
+		socket.emit("newMessage", generateMessage("Admin", "Welcome to the chat app"));
+
+		// We send the new user message to everyone in the room
+		socket.broadcast.to(params.room).emit("newMessage", generateMessage("Admin", `${params.name} has joined`));
+
+		callback();
+	});
 
 	// set up custom event listener to receive data from the client when it 
 	// emits a createMessage event.
@@ -114,6 +161,16 @@ io.on("connection", (socket) => {
 	// listen for a client disconnection e.g. closing the tab
 	socket.on("disconnect", () => {
 		console.log("Client disconnected");
+		// remove the user from the users list
+		var user = users.removeUser(socket.id);
+
+		// if the user was removed then send an event to update the
+		// the user list with the list from that room and send a message
+		// to the room saying that the user has left.
+		if(user) {
+			io.to(user.room).emit("updateUserList", users.getUserList(user.room));
+			io.to(user.room).emit("newMessage", generateMessage("Admin", `${user.name} has left.`));
+		}
 	});
 })
 
