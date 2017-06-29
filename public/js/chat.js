@@ -191,7 +191,6 @@ jQuery("#message-form").on("submit", function(e) {
 
 	// emit to the server, sending data in an object
 	socket.emit("createMessage", {
-		from: "User",
 		text: messageTextBox.val()
 		// set up the acknowledgement callback
 	}, function () {

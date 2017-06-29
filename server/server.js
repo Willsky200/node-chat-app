@@ -129,12 +129,16 @@ io.on("connection", (socket) => {
 	// callback is used for acknowledging events. It is called later
 	// to activate the acknowledgement 
 	socket.on("createMessage", (message, callback) => {
-		// log the contents
-		console.log("Create message", message);
+		// get the user who sent the message
+		var user = users.getUser(socket.id);
 
-		// emit an event to all connected users. socket.emit emits
-		// to a single connection, while io.emit sends to all users
-		io.emit("newMessage", generateMessage(message.from, message.text));
+		// check that the user exists and the string is valid
+		if(user && isRealString(message.text)) {
+			// emit a newMessage event to all those in the room and sending
+			// the user name.
+			io.to(user.room).emit("newMessage", generateMessage(user.name, message.text));
+		}
+		
 
 		// broadcasting is the name for emitting an event to everyone except
 		// the emitting user.
@@ -153,9 +157,16 @@ io.on("connection", (socket) => {
 	});
 
 	socket.on("createLocationMessage", (coords) => {
-		// emit a new event type and pass in three value (name, lat and long)
-		// to the generateLocationMessage function which will return a url.
-		io.emit("newLocationMessage", generateLocationMessage("Jimad", coords.latitude, coords.longitude));
+
+		// get the user who sent the message
+		var user = users.getUser(socket.id);
+		// check the user exists
+		if(user){
+			// emit a new event type and pass in three value (name, lat and long)
+			// to the generateLocationMessage function which will return a url.
+			io.to(user.room).emit("newLocationMessage", generateLocationMessage(user.name, coords.latitude, coords.longitude));
+		}
+		
 	});
 
 	// listen for a client disconnection e.g. closing the tab
